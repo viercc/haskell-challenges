@@ -7,7 +7,6 @@ module Lib
 import Data.IORef
 import Control.Concurrent
 import Control.Concurrent.STM
-import Control.Monad (join, when)
 import Control.Exception (bracket_)
 
 {-
@@ -16,7 +15,9 @@ prerun :: (IO a -> IO (IO b)) -> IO (IO a -> IO b)
 prerun runner =
   do mutex <- newMVar ()
      jobCell <- newIORef (error "uninitialized cell")
-     body <- runner $ join (readIORef jobCell)
+     body <- runner do
+       job <- readIORef jobCell
+       job
      return \job ->
        withMVar mutex \() -> do
          writeIORef jobCell job
@@ -43,16 +44,13 @@ withReLock (ReLock ownerVar) = bracket_ acquire release
                         | otherwise       -> retry
     release = atomically $ writeTVar ownerVar NoOwner
 
-loopWhile :: IO Bool -> IO ()
-loopWhile mma =
-  let loop = mma >>= \cond -> when cond loop
-  in loop
-
 prerun :: (IO a -> IO (IO b)) -> IO (IO a -> IO b)
 prerun runner =
   do relock <- newReLock
      jobCell <- newIORef []
-     body <- runner $ readIORef jobCell >>= head
+     body <- runner do
+       jobStack <- readIORef jobCell
+       head jobStack
      return \job ->
        withReLock relock do
          modifyIORef jobCell (job:)

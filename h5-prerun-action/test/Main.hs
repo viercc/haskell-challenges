@@ -49,18 +49,6 @@ test_strictness = do
     f2 <- prerun $ \a -> pure $ replicateM_ 0 a
     f2 $ error "The function forced its argument despite not using it"
 
-test_reentrant :: IO ()
-test_reentrant = do
-    fadd <- prerun $ \a -> pure $ (+) <$> a <*> a
-    fsub <- prerun $ \a -> pure $ (-) <$> a <*> a
-    v <- newMVar 1
-    let job = modifyMVar v (\n -> return (succ n, n))
-    ans1 <- fadd (fadd job)
-    unless (ans1 == 1 + 2 + 3 + 4) $ fail "The returned function is not reentrant"
-    ans2 <- fadd (fsub (fadd job))
-    unless (ans2 == ((5 + 6) - (7 + 8)) + ((9 + 10) - (11 + 12))) $
-      fail "The returned function is not reentrant"
-
 test_concurrency :: IO ()
 test_concurrency = do
     let is0 = [0, 1, 2, 3, 10, 20, 30, 100, 200, 300]
