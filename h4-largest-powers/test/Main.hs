@@ -5,6 +5,7 @@ module Main
     ) where
 
 import           Lib
+import qualified LibCounter
 
 import           Data.List
 import           Test.Tasty
@@ -21,20 +22,27 @@ largestPower n = go 0 where
 largestPowersIntDirect :: Int -> [Int]
 largestPowersIntDirect n = map (largestPower n) [n, 2 * n..]
 
-test_largestPowersSound :: TestTree
-test_largestPowersSound =
+test_largestPowersSound :: (Int -> [Int]) -> TestTree
+test_largestPowersSound f =
     testProperty "sound" . withMaxSuccess 500 $ \n ->
         let n' = abs n + 2
-        in take 2500 (largestPowersIntDirect n') === take 2500 (largestPowersInt n')
+        in take 2500 (largestPowersIntDirect n') === take 2500 (f n')
 
-test_largestPowersEfficient :: TestTree
-test_largestPowersEfficient =
+test_largestPowersEfficient :: (Int -> [Int]) -> TestTree
+test_largestPowersEfficient f =
     testCase "efficient" $
-        foldl' (flip (-)) 0 (take (10^8) $ largestPowersInt 13) @?= -5
+        foldl' (flip (-)) 0 (take (10^8) $ f 13) @?= -5
 
 main :: IO ()
 main =
-    defaultMain $ testGroup "all"
-        [ test_largestPowersSound
-        , test_largestPowersEfficient
+    defaultMain $ testGroup "submit"
+        [ testGroup "submit"
+            [ test_largestPowersSound Lib.largestPowersInt
+            , test_largestPowersEfficient Lib.largestPowersInt
+            ]
+        , testGroup "counter"
+            [ test_largestPowersSound LibCounter.largestPowersInt
+            , test_largestPowersEfficient LibCounter.largestPowersInt
+            ]
         ]
+

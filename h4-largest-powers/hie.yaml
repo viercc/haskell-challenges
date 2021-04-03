@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "h4-largest-powers:lib"
+
+    - path: "./test"
+      component: "h4-largest-powers:test:h4-largest-powers-test"
