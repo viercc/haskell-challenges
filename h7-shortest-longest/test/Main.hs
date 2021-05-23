@@ -129,12 +129,24 @@ test_infinite2 =
             , [ "w", "x", "yz" ]
             ]
 
+test_infinite3 :: TestTree
+test_infinite3 =
+    testCase "infinite 3" $ shortestLongest xsss @?= ["ab", "de", "yz"] where
+        xsss =
+            [ [ "ab", "c", "de" ]
+            , [ "fgh", "ij" ]
+            , [ cycle "jkl", repeat 'm', cycle "no" ]
+            , cycle [ "p", cycle "qrst", "uv" ]
+            , [ "w", "x", "yz" ]
+            ]
+
 test_cases :: TestTree
 test_cases =
     testGroup "cases"
         [ test_basic
         , test_infinite1
         , test_infinite2
+        , test_infinite3
         ]
 
 test_arbitrary :: TestTree
