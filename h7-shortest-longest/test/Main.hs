@@ -136,7 +136,7 @@ test_infinite3 =
             [ [ "ab", "c", "de" ]
             , [ "fgh", "ij" ]
             , [ cycle "jkl", repeat 'm', cycle "no" ]
-            , cycle [ "p", cycle "qrst", "uv" ]
+            , cycle [ "p", "qrst", "uv" ]
             , [ "w", "x", "yz" ]
             ]
 
